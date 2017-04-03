@@ -1,10 +1,22 @@
-# Celestial Stats
+# Celestial Stats - Discord Client
 
 Celestial Stats strives to the premier platform for chat statistics. Any platform. Any statistic.
+
+This is the Discord client for listening to Discord server activity.
 
 ## Build Status
 
 Coming Soon!
+
+## Permissions
+
+This client currently requires the following Discord [permissions](https://discordapp.com/developers/docs/topics/permissions#bitwise-permission-flags):
+
+* READ_MESSAGES - Allows reading messages in a channel. The channel will not appear for users without this permission
+* SEND_MESSAGES - Allows for sending messages in a channel.
+* ATTACH_FILES - Allows for uploading images and files
+* READ_MESSAGE_HISTORY - Allows for reading of message history
+* CHANGE_NICKNAME - Allows for modification of own nickname
 
 ## License
 

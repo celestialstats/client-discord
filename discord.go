@@ -10,23 +10,16 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-var clientId = flag.String("client-id", "", "Discord Client ID")
-var clientSecret = flag.String("client-secret", "", "Discord Client Secret")
-var botToken = flag.String("bot-token", "", "Discord Bot Token")
-var logDir = flag.String("log-dir", "", "Chat Log Directory")
-
 func main() {
 	log.Println("--- Celestial Stats Discord Client ---")
 	flag.Parse()
 	if *clientId == "" { *clientId = os.Getenv("DISCORD_CLIENTID") }
 	if *clientSecret == "" { *clientSecret = os.Getenv("DISCORD_CLIENTSECRET") }
 	if *botToken == "" { *botToken = os.Getenv("DISCORD_BOTTOKEN") }
-	if *logDir == "" { *logDir = os.Getenv("LOGDIR") }
 	log.Println("Launch Parameters:")
 	log.Println("\tDISCORD_CLIENTID:", *clientId)
 	log.Println("\tDISCORD_CLIENTSECRET:", *clientSecret)
 	log.Println("\tDISCORD_BOTTOKEN:", *botToken)
-	log.Println("\tLOGDIR:", *logDir)
 	return
 	dg, err := discordgo.New("Bot " + *botToken)
 	if err != nil {

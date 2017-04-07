@@ -8,6 +8,7 @@ import (
 	"flag"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/bwmarrin/discordgo"
+	"github.com/celestialstats/chatlog"
 )
 
 var clientId = flag.String("client-id", "", "Discord Client ID")
@@ -27,6 +28,9 @@ func main() {
 	log.Println("\tDISCORD_CLIENTSECRET:", *clientSecret)
 	log.Println("\tDISCORD_BOTTOKEN:", *botToken)
 	log.Println("\tLOGDIR:", *logDir)
+	testLog := chatlog.NewChatLog(*logDir, "DISCORD", "test")
+	log.Println(testLog.ComputeFilename())
+	testLog.OpenLog()
 	return
 	dg, err := discordgo.New("Bot " + *botToken)
 	if err != nil {

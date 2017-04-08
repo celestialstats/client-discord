@@ -28,10 +28,12 @@ func main() {
 	log.Println("\tDISCORD_CLIENTSECRET:", *clientSecret)
 	log.Println("\tDISCORD_BOTTOKEN:", *botToken)
 	log.Println("\tLOGDIR:", *logDir)
-	testLog := chatlog.NewChatLog(*logDir, "DISCORD", "test")
-	log.Println(testLog.ComputeFilename())
-	testLog.OpenLog()
+	testLog := chatlog.NewChatLog(*logDir, "DISCORD", "test", 1000)
+	testLog.AddEntry(time.Now().UTC(), "Smark", "Message", "Blah!")
+	<-make(chan struct{})
 	return
+
+	log.Fatal("LUL")
 	dg, err := discordgo.New("Bot " + *botToken)
 	if err != nil {
 		fmt.Println("error creating Discord session,", err)
@@ -60,10 +62,6 @@ func main() {
 
 	fmt.Println("Bot is now running.  Press CTRL-C to exit.")
 	// Simple way to keep program running until CTRL-C is pressed.
-	<-make(chan struct{})
-	return
-
-	log.Fatal("LUL")
 }
 
 // This function will be called (due to AddHandler above) every time a new

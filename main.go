@@ -9,7 +9,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/bwmarrin/discordgo"
 	"github.com/celestialstats/chatlog"
-	_ "github.com/davecgh/go-spew/spew"
+	"github.com/celestialstats/metacache"
 )
 
 var quit = make(chan struct{})
@@ -20,8 +20,10 @@ var rmqHostname = flag.String("rmq-hostname", "", "RabbitMQ Server Hostname")
 var rmqPort = flag.String("rmq-port", "", "RabbitMQ Server Port")
 var rmqUsername = flag.String("rmq-username", "", "RabbitMQ Username")
 var rmqPassword = flag.String("rmq-password", "", "RabbitMQ Password")
-var rmqLogQueue = flag.String("rmq-receive-queue", "", "RabbitMQ Receive Queue")
+var rmqLogQueue = flag.String("rmq-log-queue", "", "RabbitMQ Log Queue")
+var cacheExpiryMin = flag.Int("cache-expiry", -1, "Cache Expiration in Minutes")
 var logger *chatlog.ChatLog
+var metaChannels *metacache.MetaCache
 
 func main() {
 	log.SetLevel(log.DebugLevel)
@@ -37,19 +39,26 @@ func main() {
 		*botToken = os.Getenv("DISCORD_BOTTOKEN")
 	}
 	if *rmqHostname == "" {
-		*rmqHostname = os.Getenv("LOGREC_RABBITMQ_HOSTNAME")
+		*rmqHostname = os.Getenv("DISCORD_RABBITMQ_HOSTNAME")
 	}
 	if *rmqPort == "" {
-		*rmqPort = os.Getenv("LOGREC_RABBITMQ_PORT")
+		*rmqPort = os.Getenv("DISCORD_RABBITMQ_PORT")
 	}
 	if *rmqUsername == "" {
-		*rmqUsername = os.Getenv("LOGREC_RABBITMQ_USERNAME")
+		*rmqUsername = os.Getenv("DISCORD_RABBITMQ_USERNAME")
 	}
 	if *rmqPassword == "" {
-		*rmqPassword = os.Getenv("LOGREC_RABBITMQ_PASSWORD")
+		*rmqPassword = os.Getenv("DISCORD_RABBITMQ_PASSWORD")
 	}
 	if *rmqLogQueue == "" {
-		*rmqLogQueue = os.Getenv("LOGREC_RABBITMQ_RECEIVE_QUEUE")
+		*rmqLogQueue = os.Getenv("DISCORD_RABBITMQ_LOG_QUEUE")
+	}
+	if *cacheExpiryMin == -1 {
+		val, err := strconv.Atoi(os.Getenv("CACHE_EXPIRY"))
+		if err != nil {
+			// Hmm, what to do here?
+		}
+		*cacheExpiryMin = val
 	}
 	log.Info("Launch Parameters:")
 	log.Info("\tDiscord Client ID: ", *clientId)
@@ -60,6 +69,9 @@ func main() {
 	log.Info("\tRabbitMQ Username: ", *rmqUsername)
 	log.Info("\tRabbitMQ Password: ", *rmqPassword)
 	log.Info("\tRabbitMQ Log Queue: ", *rmqLogQueue)
+	log.Info("\tCache Expiry (Min): ", *cacheExpiryMin)
+
+	metaChannels = metacache.NewMetaCache(*cacheExpiryMin, 1000)
 
 	logger = chatlog.NewChatLog(
 		*rmqHostname,
@@ -103,13 +115,57 @@ func StartClient() {
 func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	curTime, _ := m.Timestamp.Parse()
 	ts := strconv.FormatInt(curTime.UnixNano()/int64(time.Millisecond), 36)
+	//channelID, _ := strconv.ParseUint(m.ChannelID, 10, 64)
+	//authorID, _ := strconv.ParseUint(m.Author.ID, 10, 64)
+
+	// CheckAndUpdate Channels also triggers Guild check.
+	metaChannels.CheckAndUpdate(
+		m.ChannelID,
+		metacache.MetaLookup{
+			Parameters: map[string]interface{}{
+				"DiscordSession": s,
+				"ChannelID":      m.ChannelID,
+			},
+			Function: getChannelData,
+		},
+	)
+
+	// Since we may have just ran across this channel for the first time
+	// we need to wait for metaChannels to actually cache the data.
+	var theMap map[string]string
+	var lookupErr error
+	for {
+		theMap, lookupErr = metaChannels.Retrieve(m.ChannelID)
+		if lookupErr == nil {
+			break
+		}
+		log.Debug("No key ", m.ChannelID, " yet... Sleeping 10ms...")
+		time.Sleep(10 * time.Millisecond)
+	}
+
 	// Print message to stdout.
 	log.Debug("[", ts, "] [", m.ChannelID, "] [", m.Author.Username, "] ", m.Content)
 	logger.AddEntry(map[string]string{
 		"Timestamp": ts,
 		"Type":      "MESSAGE",
+		"GuildID":   theMap["GuildID"],
 		"ChannelID": m.ChannelID,
 		"AuthorID":  m.Author.ID,
 		"Content":   m.Content,
 	})
+}
+
+func getChannelData(lookupData map[string]interface{}) map[string]string {
+	dg := lookupData["DiscordSession"].(*discordgo.Session)
+	chanData, err := dg.Channel(lookupData["ChannelID"].(string))
+	if err != nil {
+		log.Fatal("Error obtaining guild details:", err)
+	}
+	log.Debug("\tReturning New Discord Channel Data:")
+	log.Debug("\t\tGuildID: ", chanData.GuildID)
+	log.Debug("\t\tName: ", chanData.Name)
+	return map[string]string{
+		"GuildID": chanData.GuildID,
+		"Name":    chanData.Name,
+	}
 }

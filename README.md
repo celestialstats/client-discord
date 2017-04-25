@@ -18,6 +18,8 @@ This client currently requires the following Discord [permissions](https://disco
 * READ_MESSAGE_HISTORY - Allows for reading of message history
 * CHANGE_NICKNAME - Allows for modification of own nickname
 
+These permissions equate to 67210240 (0x4018C00). Link: https://discordapp.com/oauth2/authorize?client_id={CLIENTIDHERE}&scope=bot&permissions=67210240
+
 ## License
 
 Celestial Stats is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.

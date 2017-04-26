@@ -1,6 +1,6 @@
 FROM golang:onbuild
 
-MAINTAINER Caesar Kabalan <caesar.kabalan@gmail.com><Paste>
+MAINTAINER Caesar Kabalan <caesar.kabalan@gmail.com>
 
 ADD . /go/src/github.com/celestialstats/clientdiscord
 

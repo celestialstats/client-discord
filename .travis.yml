@@ -2,11 +2,14 @@ sudo: required
 
 language: go
 
+go:
+  - master
+
 services:
   - docker
 
 before_install:
-  - docker login -e="$DOCKER_HUB_EMAIL" -u="$DOCKER_HUB_USERNAME" -p="$DOCKER_HUB_PASSWORD"
+  - docker login --username "$DOCKER_HUB_USERNAME" --password "$DOCKER_HUB_PASSWORD"
 
 install:
   - docker build --no-cache -t celestialstats/clientdiscord:latest .

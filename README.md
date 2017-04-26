@@ -6,7 +6,9 @@ This is the Discord client for listening to Discord server activity.
 
 ## Build Status
 
-Coming Soon!
+| Master | Develop |
+|:------:|:-------:|
+| [![Build Status](https://travis-ci.org/celestialstats/clientdiscord.svg?branch=master)](https://travis-ci.org/celestialstats/clientdiscord) | [![Build Status](https://travis-ci.org/celestialstats/clientdiscord.svg?branch=develop)](https://travis-ci.org/celestialstats/clientdiscord) |
 
 ## Permissions
 
@@ -18,7 +20,7 @@ This client currently requires the following Discord [permissions](https://disco
 * READ_MESSAGE_HISTORY - Allows for reading of message history
 * CHANGE_NICKNAME - Allows for modification of own nickname
 
-These permissions equate to 67210240 (0x4018C00). Link: https://discordapp.com/oauth2/authorize?client_id={CLIENTIDHERE}&scope=bot&permissions=67210240
+These permissions equate to 67210240 (0x4018C00). Link: https://discordapp.com/oauth2/authorize?client_id=CLIENTIDHERE&scope=bot&permissions=67210240
 
 ## License
 

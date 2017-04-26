@@ -11,7 +11,7 @@ services:
 before_install:
   - docker login --username "$DOCKER_HUB_USERNAME" --password "$DOCKER_HUB_PASSWORD"
 
-install:
+script:
   - docker build --no-cache -t celestialstats/clientdiscord:latest .
 
 after_success:

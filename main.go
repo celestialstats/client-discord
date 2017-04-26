@@ -148,7 +148,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	logger.AddEntry(map[string]string{
 		"Timestamp": ts,
 		"Type":      "MESSAGE",
-		"GuildID":   theMap["GuildID"],
+		"ServerID":  theMap["GuildID"],
 		"ChannelID": m.ChannelID,
 		"AuthorID":  m.Author.ID,
 		"Content":   m.Content,
